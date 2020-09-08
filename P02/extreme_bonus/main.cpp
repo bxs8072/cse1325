@@ -14,11 +14,13 @@ int get_index_value(std::list<int> myList, int index) {
     return *it;
 }
 
-std::string get_output_data(int a, int b, int c) {
-    std::string  str_a = a==0 ? "" : std::to_string(a) + " ";
-    std::string  str_b = b==0 ? "" : std::to_string(b) + " ";
-    std::string  str_c = c==0 ? "" : std::to_string(c) + " ";
-    return str_a + str_b + str_c;
+std::string get_output_data(std::list<int> myList) {
+    std::string output;
+    for(int a: myList) {
+        std::string b = a==0 ? "" : std::to_string(a) + " ";
+        output = output + b;
+    }
+    return output;
 }
 
 std::string get_ascending_order_output(std::list<int> myList) {
@@ -96,15 +98,15 @@ int main() {
 
     std::list<int> datas;
     for(int i=0; i < number_of_rolls; ++i ) {
-        int a, b, c, sum;
+        std::list<int> myDatas;
+        int sum = 0;
         for(int j=0; j<number_of_dice; ++j) {
-             a = number_of_faces1 == 0 ? 0 : get_random_result(number_of_faces1);
-             b = number_of_faces2 == 0 ? 0 : get_random_result(number_of_faces2);
-             c = number_of_faces3 == 0 ? 0 : get_random_result(number_of_faces3);
-             sum = a + b + c;
+           int  a = number_of_faces1 == 0 ? 0 : get_random_result(number_of_faces1);
+           myDatas.push_back(a);
+             sum = sum + a;
         }   
         datas.push_back(sum);
-        std::cout << get_output_data(a,b,c) << " = " + std::to_string(sum) << std::endl;
+        std::cout << get_output_data(myDatas) << " = " + std::to_string(sum) << std::endl;
     }
     datas.sort();
     std::cout << get_ascending_order_output(datas) <<std::endl;
