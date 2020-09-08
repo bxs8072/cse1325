@@ -1,19 +1,6 @@
 #include <iostream>
 #include <ctime>
-#include <list>
-
-    
-int get_random_result(int number_of_faces) {
-    return rand() % number_of_faces + 1;
-}
-
-std::string get_output_from_list(std::list<int> myList) {
-    std::string output;
-    for(int i : myList) {
-        output = output + " " + std::to_string(i);
-    }
-    return output;
-}
+#include <vector>
 
 int main() {
     srand(time(NULL));
@@ -30,13 +17,19 @@ int main() {
 
 
     for(int i=0; i < number_of_rolls; ++i ) {
-        std::list<int> myList;
+        std::vector<int> myList;
         int sum = 0;
+
+        std::cout << "Roll " + std::to_string(i) + ": ";
+
         for(int j=0; j<number_of_dice; ++j) {
-             myList.push_back(get_random_result(number_of_faces)); 
-             sum = sum + get_random_result(number_of_faces);
+            int RANDOM_RESULT = rand() % number_of_faces + 1;
+
+            myList.push_back(RANDOM_RESULT); 
+            sum = sum + RANDOM_RESULT;
+            std::cout << RANDOM_RESULT << " ";
         }      
-        std::cout << "Roll " + std::to_string(i) + ": " << get_output_from_list(myList) << " Sum: " + std::to_string(sum) << std::endl;
+        std::cout << " Sum: " + std::to_string(sum) << std::endl;
     }
     return 0;
 }

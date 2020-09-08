@@ -1,37 +1,14 @@
 #include <iostream>
 #include <ctime>
-#include <list>
+#include <vector>
+#include <bits/stdc++.h>
+
 
 int get_random_result(int number_of_faces) {
     return rand() % number_of_faces + 1;
 }
 
-int get_index_value(std::list<int> myList, int index) {
-    std::list<int>::iterator it = myList.begin();
-    for(int i=0; i<index; i++) {
-        ++it;
-    }
-    return *it;
-}
-
-std::string get_output_data(std::list<int> myList) {
-    std::string output;
-    for(int a: myList) {
-        std::string b = a==0 ? "" : std::to_string(a) + " ";
-        output = output + b;
-    }
-    return output;
-}
-
-std::string get_ascending_order_output(std::list<int> myList) {
-    std::string output;
-    for(int i : myList) {
-        output = output + " " + std::to_string(i);
-    }
-    return output;
-}
-
-int get_sum(std::list<int> myList) {
+int get_sum(std::vector<int> myList) {
     int sum = 0;
     for(int i : myList) {
         sum = sum + i;
@@ -39,30 +16,30 @@ int get_sum(std::list<int> myList) {
     return sum;
 }
 
-double get_mean(std::list<int> myList) {
+double get_mean(std::vector<int> myList) {
     int sum = get_sum(myList);
     int total_numbers = myList.size();
     double mean = (double) (sum/(1.0 * total_numbers));
     return mean;
 }
 
-double get_median(std::list<int> myList) {
+double get_median(std::vector<int> myList) {
     auto myList_front = myList.begin();
 
     int n = myList.size();
     if(n%2 != 0) {
-        return (double) 1.0 * get_index_value(myList,n/2);
+        return (double) 1.0 * myList.at(n/2);
     }
-    return (double) (get_index_value(myList, (n-1)/2) + get_index_value(myList,n/2)) / 2.0;
+    return (double) (myList.at((n-1)/2)+ myList.at(n/2)) / 2.0;
 }
 
-int get_mode(std::list<int> myList) {
-    int number = get_index_value(myList,0);
+int get_mode(std::vector<int> myList) {
+    int number = myList.at(0);
     int mode = number;
     int count=1;
     int countMode=1;
     for(int i=0; i<myList.size(); i++) {
-        if(get_index_value(myList,i) == number) {
+        if(myList.at(i) == number) {
             ++count;
         }
         else {
@@ -71,7 +48,7 @@ int get_mode(std::list<int> myList) {
                 mode = number;
             }
             count = 1;
-            number = get_index_value(myList, i);
+            number = myList.at(i);
         }
     }
     return mode;
@@ -79,37 +56,52 @@ int get_mode(std::list<int> myList) {
 
 int main() {
     srand(time(NULL));
-    int number_of_dice, number_of_faces1, number_of_faces2, number_of_faces3, number_of_rolls;
+    int number_of_dice, number_of_rolls;
     
     std::cout << "Number of dice? ";
     std::cin >> number_of_dice;
+    
+    std::vector<int> dice_face_list;
+    for(int i=0; i<number_of_dice; i++) {
 
-    std::cout << "Number of faces per dice1? ";
-    std::cin >> number_of_faces1;
+        int number_of_faces;
+        
+        int DICE_NUMBER = i + 1;
+        std::cout << "Number of faces per dice" << DICE_NUMBER << "?";
+        std::cin >> number_of_faces;
 
-    std::cout << "Number of faces per dice2? ";
-    std::cin >> number_of_faces2;
-
-    std::cout << "Number of faces per dice3? ";
-    std::cin >> number_of_faces3;
+        dice_face_list.push_back(number_of_faces);
+    }
 
     std::cout << "Number of roll? ";
     std::cin >> number_of_rolls;
 
-    std::list<int> datas;
+    std::vector<int> datas;
     for(int i=0; i < number_of_rolls; ++i ) {
-        std::list<int> myDatas;
+
+        std::vector<int> myDatas;
         int sum = 0;
+
         for(int j=0; j<number_of_dice; ++j) {
-           int  a = number_of_faces1 == 0 ? 0 : get_random_result(number_of_faces1);
-           myDatas.push_back(a);
-             sum = sum + a;
+           int RANDOM_VAUE = dice_face_list.at(j) == 0 ? 0 : get_random_result(dice_face_list.at(j));
+
+           myDatas.push_back(RANDOM_VAUE);
+           sum = sum + RANDOM_VAUE;
+
+           std::string a_str = RANDOM_VAUE == 0 ? "" : std::to_string(RANDOM_VAUE); 
+           std::cout << a_str << " ";
         }   
+
         datas.push_back(sum);
-        std::cout << get_output_data(myDatas) << " = " + std::to_string(sum) << std::endl;
+        
+        std::cout << " = " + std::to_string(sum) << std::endl;
     }
-    datas.sort();
-    std::cout << get_ascending_order_output(datas) <<std::endl;
+    std::sort(datas.begin(), datas.end());
+
+    for(int x : datas) {
+        std::cout << x << " ";
+    }
+    std::cout <<std::endl;
     std::cout << "Sum: " << get_sum(datas) <<std::endl;
     std::cout << "Mean: " << get_mean(datas) <<std::endl;
     std::cout << "Median: " << get_median(datas) <<std::endl;

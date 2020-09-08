@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <vector>
 #include "die.h"
 
 std::string display(int num_of_faces) {
@@ -14,10 +15,11 @@ std::string display(int num_of_faces) {
 
 int main() {
     srand(time(NULL));
-    std::cout << "d4: " << display(4) << std::endl;
-    std::cout << "d6: " << display(6) << std::endl;
-    std::cout << "d8: " << display(8) << std::endl;
-    std::cout << "d12: " << display(12) << std::endl;
-    std::cout << "d20: " << display(20) << std::endl;
+    std::vector<int> facesList = {4, 6, 8, 12, 20};
+    for(int x: facesList) {
+        std::cout << "d" << x << ": " 
+        << display(x)
+        << std::endl;
+    }
     return 0;
 }
