@@ -31,8 +31,7 @@ int main()
     {
         int sum = 0;
         std::list<Die> datas;
-        
-        Die d1(number_of_faces), d2(number_of_faces), d3(number_of_faces);
+    
         for (int j = 0; j < number_of_dice; ++j)
         {   
             Die myDie(number_of_faces);
@@ -42,7 +41,7 @@ int main()
 
             sum = sum + myDie.get_value();
         }
-        std::cout << "Roll " + std::to_string(i) + ": "
+        std::cout << "Roll " + std::to_string(i) + ":"
                   << get_output_from_list(datas)
                   << " Sum: " + std::to_string(sum) << std::endl;
     }
