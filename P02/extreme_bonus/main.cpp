@@ -112,5 +112,5 @@ int main() {
     std::cout << "Mean: " << get_mean(datas) <<std::endl;
     std::cout << "Median: " << get_median(datas) <<std::endl;
     std::cout << "Mode: " << get_mode(datas) <<std::endl;
-    return 1;
+    return 0;
 }
