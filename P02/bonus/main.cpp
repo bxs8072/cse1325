@@ -1,7 +1,16 @@
 
 #include <iostream>
 #include <ctime>
+#include <list>
 #include "die.h"
+
+std::string get_output_from_list(std::list<Die> myList) {
+    std::string output;
+    for(Die x: myList) {
+        output = output + " " + std::to_string(x.get_value());
+    }
+    return output;
+}
 
 int main()
 {
@@ -20,19 +29,21 @@ int main()
 
     for (int i = 0; i < number_of_rolls; ++i)
     {
-        int sum;
+        int sum = 0;
+        std::list<Die> datas;
+        
         Die d1(number_of_faces), d2(number_of_faces), d3(number_of_faces);
         for (int j = 0; j < number_of_dice; ++j)
-        {
-            d1.roll();
-            d2.roll();
-            d3.roll();
-            sum = d1.get_value() + d2.get_value() + d3.get_value();
+        {   
+            Die myDie(number_of_faces);
+            myDie.roll();
+
+            datas.push_back(myDie);
+
+            sum = sum + myDie.get_value();
         }
         std::cout << "Roll " + std::to_string(i) + ": "
-                  << d1.get_value() << " "
-                  << d2.get_value() << " "
-                  << d3.get_value() << " "
+                  << get_output_from_list(datas)
                   << " Sum: " + std::to_string(sum) << std::endl;
     }
     return 0;
