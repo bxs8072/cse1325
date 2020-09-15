@@ -14,9 +14,21 @@ Tile::Tile(std::string word) : _word(word), _matched(false)
     Tile::_blank = initBlank;
 }
 
+std::ostream& operator<<(std::ostream& ost, const Tile& _tile) {
+   return ost << &_tile._word;
+}
+
+bool Tile::operator == (const Tile& _tile) const {
+    return this->_word == _tile._word;
+}
+
+bool Tile::operator != (const Tile& _tile) const {
+    return !(this->_word == _tile._word);
+}
+
 bool Tile::match(Tile &_tile)
 {
-    if (_tile._word == this->_word)
+    if (*this == _tile)
     {
         this->_matched = true;
         _tile._matched = true;
