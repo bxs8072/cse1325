@@ -17,15 +17,15 @@ std::vector<std::string> words{
     "come", "date", "diet", "face", "bang", "beam", "bear", "cafe", "came", "cold",
     "come", "date", "diet", "face"};
 
+int myRandom(int i) {
+    return std::rand() % i;
+}
+
 Board::Board(int tiles)
 {
     std::srand(unsigned(std::time(0)));
 
-    std::random_device rd;
-
-    std::mt19937 g(rd());
-
-    std::shuffle(words.begin(), words.end(), g);
+    std::random_shuffle(words.begin(), words.end(), myRandom);
 
     std::vector<Tile> _initTiles = {};
 
@@ -47,7 +47,7 @@ Board::Board(int tiles)
         }
     }
 
-    std::shuffle(_initTiles.begin(), _initTiles.end(), g);
+    std::random_shuffle(_initTiles.begin(), _initTiles.end(), myRandom);
     this->_tiles = _initTiles;
 }
 
