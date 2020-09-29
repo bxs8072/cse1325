@@ -2,7 +2,6 @@
 #include "or.h"
 #include "gate.h"
 #include <iostream>
-#include <vector>
 
 int main()
 {
