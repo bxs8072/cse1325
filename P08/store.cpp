@@ -4,9 +4,15 @@
 Store::Store(std::string name) : _name{name} { }
 
 Store::Store(std::istream& ist) {
-    ist >> _name;
-    while(ist)
-     _products.push_back(new Product{ist});
+    std::getline(ist, _name);
+    std::string name;
+    while(ist) {
+        std::getline(ist, name);
+        if(name == "tool") _products.push_back(new Tool(ist));
+        else if(name == "plant") _products.push_back(new Plant(ist));
+        else if(name == "mulch") _products.push_back(new Mulch(ist));
+        else if(name.size()) throw std::runtime_error{"Invalid product type input: " + name};
+    }
 }
 
 

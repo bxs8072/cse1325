@@ -10,7 +10,7 @@ enum class Material {
   HARDWOOD,
 };
 
-Material from_string(std::string material);
+Material material_from_string(std::string material);
 
 std::string to_string(Material material);
 

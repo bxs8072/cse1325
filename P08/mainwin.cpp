@@ -3,11 +3,6 @@
 
 
 Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}} {
-
-    // /////////////////
-    // G U I   S E T U P
-    // /////////////////
-
     set_default_size(640, 480);
     set_title("Manga Magic");
 
@@ -31,7 +26,7 @@ Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}} {
     //     N E W  S T O R E
     // Append Quit to the File menu
     Gtk::MenuItem *menuitem_new_store = Gtk::manage(new Gtk::MenuItem("_New store", true));
-    menuitem_new_store->signal_activate().connect([this] {this->on_new_store_click();});
+    menuitem_new_store->signal_activate().connect([this] {this->on_new_store_click(true);});
     filemenu->append(*menuitem_new_store);
 
         //         S A V E
@@ -112,74 +107,44 @@ Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}} {
     vbox->show_all();
 
     // Start a new game
-    on_new_store_click();
+    on_new_store_click(false);
 }
 
 Mainwin::~Mainwin() { }
 
-// /////////////////
-// C A L L B A C K S
-// /////////////////
-
-void Mainwin::on_new_store_click() {
+void Mainwin::on_new_store_click(bool isNewStore)
+{
     delete store;
-    filename = get_string("Store name?");
-    store = new Store{filename};
-}
+    store = nullptr;
 
-void Mainwin::on_save_click() {
-    auto filter_store = Gtk::FileFilter::create();
-    filter_store->set_name("Store Files");
-    filter_store->add_pattern("*.store");
-
-    std::ofstream ofs{filename + ".store"};
-    store->save(ofs);
-}
-
-void Mainwin::on_open_click() {
-    Gtk::FileChooserDialog dialog("Please choose a file",
-    Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SAVE);
-
-    dialog.set_transient_for(*this);
-
-    auto filter_store = Gtk::FileFilter::create();
-    filter_store->set_name("Store Files");
-    filter_store->add_pattern("*.store");
-    dialog.add_filter(filter_store);
-
-    auto filter_any = Gtk::FileFilter::create();
-    filter_any->set_name("Any Files");
-    filter_any->add_pattern("*");
-    dialog.add_filter(filter_any);
-
-    dialog.set_filename("untitled.store");
-
-    dialog.add_button("_Cancel", 0);
-    dialog.add_button("_Open", 1);
-
-    int result = dialog.run();
-
-    if(result == 1) {
-        try
-        {
-            delete store;
-            std::ifstream ifs{dialog.get_filename()};
-            store = new Store{ifs};
-            on_view_products_click();
-        }
-        catch(const std::exception& e)
-        {
-            Gtk::MessageDialog(*this, "Unsable to save the file").run();
-        }
-        
+    if(isNewStore) {
+        filename = get_string("Enter new store name: ");
+    } else {
+        filename = "default_store";
     }
-    
-
+    store = new Store{filename};
+    on_view_products_click();
 }
 
-void Mainwin::on_save_as_click() {
+void Mainwin::on_save_click()
+{
+    try
+    {
+        std::ofstream ofs{filename};
+        store->save(ofs);
+    }
+    catch (std::exception &e)
+    {
+        Gtk::MessageDialog{*this, "Unable to save the store: " + std::string{e.what()},
+                           false, Gtk::MESSAGE_WARNING}
+            .run();
+    }
+}
+
+void Mainwin::on_save_as_click()
+{
     Gtk::FileChooserDialog dialog("Please choose a file",
-    Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SAVE);
+                                  Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SAVE);
 
     dialog.set_transient_for(*this);
 
@@ -200,21 +165,60 @@ void Mainwin::on_save_as_click() {
 
     int result = dialog.run();
 
-    if(result == 1) {
+    if (result == 1)
+    {
         try
         {
             std::ofstream ofs{dialog.get_filename()};
             store->save(ofs);
         }
-        catch(const std::exception& e)
+        catch (const std::exception &e)
         {
-            Gtk::MessageDialog(*this, "Unsable to save the file").run();
+            Gtk::MessageDialog(*this, "Unable to save the file").run();
         }
-        
     }
-    
+}
 
-    
+void Mainwin::on_open_click()
+{
+    Gtk::FileChooserDialog dialog("Please choose a file",
+                                  Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SAVE);
+
+    dialog.set_transient_for(*this);
+
+    auto filter_store = Gtk::FileFilter::create();
+    filter_store->set_name("Store Files");
+    filter_store->add_pattern("*.store");
+    dialog.add_filter(filter_store);
+
+    auto filter_any = Gtk::FileFilter::create();
+    filter_any->set_name("Any Files");
+    filter_any->add_pattern("*");
+    dialog.add_filter(filter_any);
+
+    dialog.set_filename("untitled.store");
+
+    dialog.add_button("_Cancel", 0);
+    dialog.add_button("_Open", 1);
+
+    int result = dialog.run();
+
+    if (result == 1)
+    {
+        try
+        {   
+            filename = dialog.get_filename();
+            std::ifstream ifs{filename};
+            delete store;
+            store == nullptr;
+            store = new Store{ifs};
+            on_view_products_click();
+        }
+        catch (const std::exception &e)
+        {
+            Gtk::MessageDialog(*this, "Unable to open the store" + std::string(e.what())).run();
+        }
+    }
 }
 
 void Mainwin::on_about_click() {

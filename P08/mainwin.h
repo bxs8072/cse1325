@@ -10,8 +10,7 @@ class Mainwin : public Gtk::Window {
         Mainwin();
         virtual ~Mainwin();
     protected:
-
-        void on_new_store_click();  // Create a new store
+        void on_new_store_click(bool isNewStore);  // Create a new store
         void on_save_click(); 
         void on_save_as_click();
         void on_open_click(); 
