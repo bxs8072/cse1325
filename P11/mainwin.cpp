@@ -1,7 +1,7 @@
 #include "mainwin.h"
 #include "entrydialog.h"
 
-Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}}, msg{new Gtk::Label{}}, filename{"defaultstore.store"}
+Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}}, msg{new Gtk::Label{}}, filename{"default_store.store"}
 {
     // /////////////////
     // G U I   S E T U P
@@ -145,9 +145,88 @@ Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}}, msg{new Gtk::Lab
     menuitem_about->signal_activate().connect([this] { this->on_about_click(); });
     helpmenu->append(*menuitem_about);
 
+    // /////////////
+    // T O O L B A R
+    // Add a toolbar to the vertical box below the menu
+    Gtk::Toolbar *toolbar = Gtk::manage(new Gtk::Toolbar);
+    vbox->pack_start(*toolbar, Gtk::PACK_SHRINK, 0);
+
+    //     N E W   S T O R E
+    // Add a new store icon
+    Gtk::Image *new_store_image = Gtk::manage(new Gtk::Image{"new_file.png"});
+    Gtk::ToolButton *new_store_button = Gtk::manage(new Gtk::ToolButton(*new_store_image));
+    new_store_button->set_tooltip_markup("Create a new store, discarding any unsaved data");
+    new_store_button->signal_clicked().connect([this] { this->on_new_store_click(true); });
+    toolbar->append(*new_store_button);
+
+    //     O P E N  S T O R E
+    // Add a open store icon
+    Gtk::Image *open_store_image = Gtk::manage(new Gtk::Image{"open_file.png"});
+    Gtk::ToolButton *open_store_button = Gtk::manage(new Gtk::ToolButton(*open_store_image));
+    open_store_button->set_tooltip_markup("Open saved store file");
+    open_store_button->signal_clicked().connect([this] { this->on_open_click(); });
+    toolbar->append(*open_store_button);
+
+    //     S A V E  S T O R E
+    // Add a save store icon
+    Gtk::Image *save_store_image = Gtk::manage(new Gtk::Image{"save_file.png"});
+    Gtk::ToolButton *save_store_button = Gtk::manage(new Gtk::ToolButton(*save_store_image));
+    save_store_button->set_tooltip_markup("Open saved store file");
+    save_store_button->signal_clicked().connect([this] { this->on_save_click(); });
+    toolbar->append(*save_store_button);
+
+    //     L I S T   P R O D U C T S
+    // Add a icon for listing products
+    Gtk::Image *list_Products_image = Gtk::manage(new Gtk::Image{"products.png"});
+    Gtk::ToolButton *list_products_button = Gtk::manage(new Gtk::ToolButton(*list_Products_image));
+    list_products_button->set_tooltip_markup("List products");
+    list_products_button->signal_clicked().connect([this] { this->on_view_products_click(); });
+    toolbar->append(*list_products_button);
+
+    //      N E W  C U S T O M E R
+    // Add a new customer icon
+    Gtk::Image *new_customer_image = Gtk::manage(new Gtk::Image{"new_customer.png"});
+    Gtk::ToolButton *new_customer_button = Gtk::manage(new Gtk::ToolButton(*new_customer_image));
+    new_customer_button->set_tooltip_markup("Create a new customer");
+    new_customer_button->signal_clicked().connect([this] { this->on_new_customer_click(); });
+    toolbar->append(*new_customer_button);
+
+    //      L I S T  C U S T O M E R S
+    // Add a listing customers icon
+    Gtk::Image *list_customer_image = Gtk::manage(new Gtk::Image{"customers.png"});
+    Gtk::ToolButton *list_customer_button = Gtk::manage(new Gtk::ToolButton(*list_customer_image));
+    list_customer_button->set_tooltip_markup("Create a new customer");
+    list_customer_button->signal_clicked().connect([this] { this->on_view_customers_click(); });
+    toolbar->append(*list_customer_button);
+
+    //     P L A C E   O R D E R
+    // Add a icon for placing an order
+    Gtk::Image *place_order_image = Gtk::manage(new Gtk::Image{"add_order.png"});
+    Gtk::ToolButton *place_order_button = Gtk::manage(new Gtk::ToolButton(*place_order_image));
+    place_order_button->set_tooltip_markup("Place an order");
+    place_order_button->signal_clicked().connect([this] { this->on_new_order_click(); });
+    toolbar->append(*place_order_button);
+
+    //     L I S T   O R D E R S
+    // Add a icon for listing orders
+    Gtk::Image *list_orders_image = Gtk::manage(new Gtk::Image{"cart.png"});
+    Gtk::ToolButton *list_orders_button = Gtk::manage(new Gtk::ToolButton(*list_orders_image));
+    list_orders_button->set_tooltip_markup("List an order");
+    list_orders_button->signal_clicked().connect([this] { this->on_view_orders_click(); });
+    toolbar->append(*list_orders_button);
+
+    //     Q U I T
+    // Add a icon for quit
+    Gtk::Image *quit_image = Gtk::manage(new Gtk::Image{"quit.png"});
+    Gtk::ToolButton *quit_button = Gtk::manage(new Gtk::ToolButton(*quit_image));
+    quit_button->set_tooltip_markup("Quit");
+    quit_button->signal_clicked().connect([this] { this->on_quit_click(); });
+    toolbar->append(*quit_button);
+
     // /////////////////////////// ////////////////////////////////////////////
     // M A I N   W I N D O W   D I S P L A Y
     // Provide a text entry box to show the remaining sticks
+
     display = Gtk::manage(new Gtk::Label());
     display->set_hexpand(true);
     display->set_vexpand(true);
@@ -172,27 +251,34 @@ Mainwin::~Mainwin() {}
 
 void Mainwin::on_new_store_click(bool isNewStore)
 {
-    delete store;
-    store = nullptr;
-
+    set_status("");
     if (isNewStore)
     {
-        filename = get_string("Enter new store name: ");
+        EntryDialog edialog(*this, "<big>New Store</big>", true, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
+        edialog.set_secondary_text("Enter new store name: ", true);
+        if (edialog.run() == Gtk::RESPONSE_CANCEL)
+            throw std::runtime_error{"CANCEL"};
+        filename = edialog.get_text() + ".store";
     }
     else
     {
         filename = "default_store.store";
     }
+    delete store;
+    store = nullptr;
     store = new Store{filename};
+    set_title("MANGA MAGIC " + store->name());
     on_view_products_click();
 }
 
 void Mainwin::on_save_click()
 {
+    set_status("");
     try
     {
         std::ofstream ofs{filename};
         store->save(ofs);
+        set_status("Saved to " + filename);
     }
     catch (std::exception &e)
     {
@@ -204,6 +290,8 @@ void Mainwin::on_save_click()
 
 void Mainwin::on_save_as_click()
 {
+    set_status("");
+
     Gtk::FileChooserDialog dialog("Please choose a file",
                                   Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SAVE);
 
@@ -219,7 +307,7 @@ void Mainwin::on_save_as_click()
     filter_any->add_pattern("*");
     dialog.add_filter(filter_any);
 
-    dialog.set_filename("untitled.store");
+    dialog.set_filename("default_store.store");
 
     dialog.add_button("_Cancel", 0);
     dialog.add_button("_Save", 1);
@@ -242,6 +330,8 @@ void Mainwin::on_save_as_click()
 
 void Mainwin::on_open_click()
 {
+    set_status("");
+
     Gtk::FileChooserDialog dialog("Please choose a file",
                                   Gtk::FileChooserAction::FILE_CHOOSER_ACTION_SAVE);
 
@@ -280,10 +370,14 @@ void Mainwin::on_open_click()
             Gtk::MessageDialog(*this, "Unable to open the store" + std::string(e.what())).run();
         }
     }
+    set_status("Opened " + filename);
+    set_title("MANGA MAGIC " + store->name());
+    on_view_products_click();
 }
 
 void Mainwin::on_about_click()
 {
+    set_status("");
     Gtk::AboutDialog dialog;
     dialog.set_transient_for(*this);
     dialog.set_program_name("MANGA");
@@ -303,6 +397,7 @@ void Mainwin::on_about_click()
 
 void Mainwin::on_new_customer_click()
 {
+    set_status("");
     Gtk::Dialog dialog{"Add Customer", *this};
     Gtk::Grid grid;
 
@@ -329,35 +424,36 @@ void Mainwin::on_new_customer_click()
     dialog.show_all();
     int response = dialog.run();
 
-    if (response == 1)
+    while (response)
     {
+        std::string name = std::string(e_name.get_text());
+        std::string phone = std::string(e_phone.get_text());
+        std::string email = std::string(e_email.get_text());
         try
         {
-            std::string name = std::string(e_name.get_text());
-            std::string phone = std::string(e_phone.get_text());
-            std::string email = std::string(e_email.get_text());
             store->add_customer(*(new Customer{name, phone, email}));
-            on_view_customers_click();
+            set_status("Added Customer " + name);
+            break;
         }
         catch (std::exception &e)
         {
+            Gtk::MessageDialog{*this, "Unable to create new customer " + name + ": " + std::string{e.what()},
+                               false, Gtk::MESSAGE_WARNING}
+                .run();
+            break;
         }
     }
-    else
-    {
-        throw std::runtime_error{"CANCEL"};
-    }
+    on_view_customers_click();
 }
 
 void Mainwin::on_new_order_click()
 {
     set_status("");
     int order_number;
+    std::ostringstream oss;
+
     {
         Gtk::Dialog dialog{"Order for which customer?", *this};
-        dialog.set_resizable(true);
-        std::ostringstream oss;
-
         Gtk::ComboBoxText customer_selector;
         for (int i = 0; i < store->customers(); ++i)
         {
@@ -381,8 +477,6 @@ void Mainwin::on_new_order_click()
 
     {
         Gtk::MessageDialog dialog{*this, "Add to order " + std::to_string(order_number)};
-        dialog.set_resizable(true);
-        std::ostringstream oss;
 
         Gtk::HBox quantityBox;
         Gtk::Label quantityLabel{"Quantity"};
@@ -390,8 +484,8 @@ void Mainwin::on_new_order_click()
 
         Gtk::SpinButton quantity_button;
         quantityBox.add(quantity_button);
-        quantity_button.set_range(1, 100);
-        quantity_button.set_increments(1, 1);
+        quantity_button.set_range(1.0, 99.0);
+        quantity_button.set_increments(1.0, 10.0);
         quantityBox.add(quantity_button);
 
         dialog.get_content_area()->add(quantityBox);
@@ -421,67 +515,193 @@ void Mainwin::on_new_order_click()
             else
                 break;
         }
-        on_view_orders_click();
     }
+    on_view_orders_click();
 }
 
 void Mainwin::on_new_tool_click()
 {
-    try
+    set_status("");
+    Gtk::Dialog dialog{"Add Customer", *this};
+    Gtk::Grid grid;
+
+    Gtk::Label t_name{"Tool Name: "};
+    Gtk::Entry e_name;
+    grid.attach(t_name, 0, 0, 1, 1);
+    grid.attach(e_name, 1, 0, 2, 1);
+
+    Gtk::Label t_price{"Price: "};
+    Gtk::Entry e_price;
+    grid.attach(t_price, 0, 1, 1, 1);
+    grid.attach(e_price, 1, 1, 2, 1);
+
+    Gtk::Label t_description{"Description: "};
+    Gtk::Entry e_description;
+    grid.attach(t_description, 0, 2, 1, 1);
+    grid.attach(e_description, 1, 2, 2, 1);
+
+    dialog.get_content_area()->add(grid);
+
+    dialog.add_button("Add", 1);
+    dialog.add_button("Cancel", 0);
+
+    dialog.show_all();
+    int response = dialog.run();
+
+    while (response)
     {
-        std::string name = get_string("Name?");
-        double price = get_double("Price?");
-        std::string description = get_string("Description?");
-        store->add_product(*(new Tool{name, price, description}));
-        on_view_products_click();
+        std::string name = std::string(e_name.get_text());
+        double price = atof(e_price.get_text().c_str());
+        std::string description = std::string(e_description.get_text());
+        try
+        {
+            store->add_product(*(new Tool{name, price, description}));
+            set_status("Added new tool " + name);
+            break;
+        }
+        catch (std::exception &e)
+        {
+            Gtk::MessageDialog{*this, "Unable to create new tool " + name + ": " + std::string{e.what()},
+                               false, Gtk::MESSAGE_WARNING}
+                .run();
+            break;
+        }
     }
-    catch (std::exception &e)
-    {
-    }
+    on_view_products_click();
 }
 
 void Mainwin::on_new_plant_click()
 {
-    try
+    set_status("");
+    Gtk::Dialog dialog{"Add Plant", *this};
+
+    Gtk::Grid grid;
+    Gtk::Label l_name{"Name"};
+    Gtk::Entry e_name;
+    grid.attach(l_name, 0, 0, 1, 1);
+    grid.attach(e_name, 1, 0, 2, 1);
+
+    Gtk::Label l_price{"Price"};
+    Gtk::Entry e_price;
+    grid.attach(l_price, 0, 1, 1, 1);
+    grid.attach(e_price, 1, 1, 2, 1);
+
+    Gtk::Label l_description{"Description"};
+    Gtk::Entry e_description;
+    grid.attach(l_description, 0, 2, 1, 1);
+    grid.attach(e_description, 1, 2, 2, 1);
+
+    Gtk::Label l_species{"Species"};
+    Gtk::Entry e_species;
+    grid.attach(l_species, 0, 3, 1, 1);
+    grid.attach(e_species, 1, 3, 2, 1);
+
+    Gtk::Label exposure{"EXPOSURE"};
+    Gtk::ComboBoxText type{true};
+
+    type.append("Shade");
+    type.append("Part Sun");
+    type.append("Full Sun");
+    type.set_active(0);
+
+    grid.attach(exposure, 0, 4, 1, 1);
+    grid.attach(type, 1, 4, 2, 1);
+
+    dialog.get_content_area()->add(grid);
+
+    dialog.add_button("Enter", 1);
+    dialog.add_button("Cancel", 0);
+
+    dialog.show_all();
+    while (dialog.run())
     {
-        std::string name = get_string("Name?");
-        double price = get_double("Price?");
-        std::string description = get_string("Description?");
-        std::string species = get_string("Species?");
-        double d = get_double("Exposure? (1) Shade (2) Part Sun (3) Sun");
-        Exposure exposure = (d == 1.0) ? Exposure::SHADE : ((d == 3.0) ? Exposure::SUN : Exposure::PARTSUN);
-        store->add_product(*(new Plant{name, price, description, species, exposure}));
-        on_view_products_click();
+        std::string name = std::string(e_name.get_text());
+        double price = atof(e_price.get_text().c_str());
+        std::string description = std::string(e_description.get_text());
+        std::string species = std::string(e_species.get_text());
+        Exposure exposure = exposure_from_string(type.get_active_text());
+        try
+        {
+            store->add_product(*(new Plant{name, price, description, species, exposure}));
+            set_status("Added New Plant " + name);
+            break;
+        }
+        catch (std::exception &e)
+        {
+            Gtk::MessageDialog{*this, "Unable to create new plant " + name + ": " + std::string{e.what()},
+                               false, Gtk::MESSAGE_WARNING}
+                .run();
+            break;
+        }
     }
-    catch (std::exception &e)
-    {
-    }
+    on_view_products_click();
 }
 
 void Mainwin::on_new_mulch_click()
 {
-    try
+    set_status("");
+    Gtk::Dialog dialog{"Add Mulch", *this};
+    Gtk::Grid grid;
+    Gtk::Label l_name{"Name"};
+    Gtk::Entry e_name;
+    grid.attach(l_name, 0, 0, 1, 1);
+    grid.attach(e_name, 1, 0, 2, 1);
+
+    Gtk::Label l_price{"Price"};
+    Gtk::Entry e_price;
+    grid.attach(l_price, 0, 1, 1, 1);
+    grid.attach(e_price, 1, 1, 2, 1);
+
+    Gtk::Label l_description{"Description"};
+    Gtk::Entry e_description;
+    grid.attach(l_description, 0, 2, 1, 1);
+    grid.attach(e_description, 1, 2, 2, 1);
+
+    Gtk::Label l_volume{"Volume (cubic ft)"};
+    Gtk::Entry e_volume;
+    grid.attach(l_volume, 0, 3, 1, 1);
+    grid.attach(e_volume, 1, 3, 2, 1);
+
+    Gtk::Label material{"Material"};
+    Gtk::ComboBoxText type{true};
+
+    type.append("Rubber");
+    type.append("Pine");
+    type.append("Cedar");
+    type.append("Hardwood");
+    type.set_active(0);
+
+    grid.attach(material, 0, 4, 1, 1);
+    grid.attach(type, 1, 4, 2, 1);
+
+    dialog.get_content_area()->add(grid);
+
+    dialog.add_button("Enter", 1);
+    dialog.add_button("Cancel", 0);
+
+    dialog.show_all();
+    while (dialog.run())
     {
-        std::string name = get_string("Name?");
-        double price = get_double("Price?");
-        std::string description = get_string("Description?");
-        int volume = get_int("Volume (ft³)?");
-        int i = get_int("Material? (1) Rubber (2) Pine (3) Cedar (4) Hardwood");
-        Material material;
-        if (i == 1)
-            material = Material::RUBBER;
-        else if (i == 2)
-            material = Material::PINE;
-        else if (i == 3)
-            material = Material::CEDAR;
-        else
-            material = Material::HARDWOOD;
-        store->add_product(*(new Mulch{name, price, description, volume, material}));
-        on_view_products_click();
+        std::string name = std::string(e_name.get_text());
+        double price = atof(e_price.get_text().c_str());
+        std::string description = std::string(e_description.get_text());
+        int volume = std::stoi(e_volume.get_text());
+        Material material = material_from_string(type.get_active_text());
+        try
+        {
+            store->add_product(*(new Mulch{name, price, description, volume, material}));
+            set_status("Added New Mulch " + name);
+            break;
+        }
+        catch (std::exception &e)
+        {
+            Gtk::MessageDialog{*this, "Unable to create new plant " + name + ": " + std::string{e.what()},
+                               false, Gtk::MESSAGE_WARNING}
+                .run();
+            break;
+        }
     }
-    catch (std::exception &e)
-    {
-    }
+    on_view_products_click();
 }
 
 void Mainwin::on_edit_customer_click()
@@ -518,7 +738,6 @@ void Mainwin::on_edit_customer_click()
         {
             store->delete_customer(index_number);
         }
-        set_status("Customers being edited " + std::to_string(index_number));
     }
 
     {
@@ -548,28 +767,32 @@ void Mainwin::on_edit_customer_click()
         dialog.show_all();
         int response = dialog.run();
 
-        if (response == 1)
+        while (response)
         {
+            std::string name = std::string(e_name.get_text());
+            std::string phone = std::string(e_phone.get_text());
+            std::string email = std::string(e_email.get_text());
             try
             {
-                std::string name = std::string(e_name.get_text());
-                std::string phone = std::string(e_phone.get_text());
-                std::string email = std::string(e_email.get_text());
                 store->edit_customer(index_number, name, phone, email);
-                on_view_customers_click();
+                set_status("Edited Customer " + name);
+                break;
             }
             catch (std::exception &e)
             {
+                Gtk::MessageDialog{*this, "Unable to create new customer " + name + ": " + std::string{e.what()},
+                                   false, Gtk::MESSAGE_WARNING}
+                    .run();
+                break;
             }
         }
-        else
-        {
-            throw std::runtime_error{"CANCEL"};
-        }
     }
+    on_view_customers_click();
 }
+
 void Mainwin::on_view_products_click()
 {
+    set_status("");
     std::string s = "Current Products\n----------------\n\n";
     for (int i = 0; i < store->products(); ++i)
     {
@@ -578,10 +801,12 @@ void Mainwin::on_view_products_click()
         s += oss.str();
     }
     display->set_text(s);
+    set_status("Products List loaded");
 }
 
 void Mainwin::on_view_customers_click()
 {
+    set_status("");
     std::string s = "Current Customers\n----------------\n\n";
     store->get_sorted_customers();
     for (int i = 0; i < store->customers(); ++i)
@@ -592,10 +817,12 @@ void Mainwin::on_view_customers_click()
         s += oss.str();
     }
     display->set_text(s);
+    set_status("Customers List loaded");
 }
 
 void Mainwin::on_view_orders_click()
 {
+    set_status("");
     std::string s = "Current Orders\n----------------\n\n";
     for (int i = 0; i < store->orders(); ++i)
     {
@@ -605,6 +832,7 @@ void Mainwin::on_view_orders_click()
         s += oss.str();
     }
     display->set_text(s);
+    set_status("Orders List loaded");
 }
 
 void Mainwin::on_quit_click()
