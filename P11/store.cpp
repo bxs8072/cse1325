@@ -1,7 +1,9 @@
 #include "store.h"
 #include <iostream>
+#include <algorithm>
 
-Store::Store(std::string name) : _name{name} { }
+Store::Store(std::string name) : _name{name} {
+ }
 
 Store::Store(std::istream& ist) {
     std::getline(ist, _name);
@@ -51,11 +53,24 @@ void Store::add_product(const Tool& product) {_products.push_back(new Tool{produ
 void Store::add_product(const Plant& product) {_products.push_back(new Plant{product});}
 void Store::add_product(const Mulch& product) {_products.push_back(new Mulch{product});}
 
-
 int Store::customers() {return _customers.size();}
 Customer& Store::customer(int index) {return *_customers.at(index);}
 void Store::add_customer(const Customer& customer) {_customers.push_back(new Customer{customer});}
+void Store::edit_customer(int index, std::string name, std::string phone, std::string email) {
+    customer(index) = Customer{name, phone, email};
+}
 
+void Store::delete_customer(int& index) {
+     *_customers.erase(index);
+}
+
+bool compare(Customer* a, Customer* b) {
+    return a->get_name().compare(b->get_name()) < 0;
+}
+
+void Store::get_sorted_customers() {
+    std::sort(_customers.begin(), _customers.end(), compare);
+}
 
 int Store::orders() {return _orders.size();}
 Order& Store::order(int index) {return *_orders.at(index);}

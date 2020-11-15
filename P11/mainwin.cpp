@@ -1,7 +1,6 @@
 #include "mainwin.h"
 #include "entrydialog.h"
 
-
 Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}}, msg{new Gtk::Label{}}, filename{"defaultstore.store"}
 {
     // /////////////////
@@ -95,6 +94,19 @@ Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}}, msg{new Gtk::Lab
     menuitem_mulch->signal_activate().connect([this] { this->on_new_mulch_click(); });
     insertmenu->append(*menuitem_mulch);
 
+    // E D I T
+    // Create an Edit menu and add to the menu bar
+    Gtk::MenuItem *menuitem_edit = Gtk::manage(new Gtk::MenuItem("_Edit", true));
+    menubar->append(*menuitem_edit);
+    Gtk::Menu *editmenu = Gtk::manage(new Gtk::Menu());
+    menuitem_edit->set_submenu(*editmenu);
+
+    //           C U S T O M E R S
+    // Append view all products to the view menu
+    Gtk::MenuItem *menuitem_ecustomer = Gtk::manage(new Gtk::MenuItem("_Customer", true));
+    menuitem_ecustomer->signal_activate().connect([this] { this->on_edit_customer_click(); });
+    editmenu->append(*menuitem_ecustomer);
+
     //     V I E W
     // Create an View menu and add to the menu bar
     Gtk::MenuItem *menuitem_view = Gtk::manage(new Gtk::MenuItem("_View", true));
@@ -141,7 +153,7 @@ Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}}, msg{new Gtk::Lab
     display->set_vexpand(true);
     vbox->add(*display);
 
-    msg= Gtk::manage(new Gtk::Label());
+    msg = Gtk::manage(new Gtk::Label());
     msg->set_hexpand(true);
     vbox->pack_start(*msg, Gtk::PACK_SHRINK, 0);
 
@@ -338,77 +350,78 @@ void Mainwin::on_new_customer_click()
 }
 
 void Mainwin::on_new_order_click()
-{   
+{
     set_status("");
     int order_number;
     {
         Gtk::Dialog dialog{"Order for which customer?", *this};
-    dialog.set_resizable(true);
-    std::ostringstream oss;
+        dialog.set_resizable(true);
+        std::ostringstream oss;
 
-    Gtk::ComboBoxText customer_selector;
-    for (int i = 0; i < store->customers(); ++i)
-    {
-        oss.str("");
-        oss << store->customer(i);
-        customer_selector.append(oss.str());
-    }
-    customer_selector.set_active(store->customers() - 1);
-    dialog.get_content_area()->add(customer_selector);
+        Gtk::ComboBoxText customer_selector;
+        for (int i = 0; i < store->customers(); ++i)
+        {
+            oss.str("");
+            oss << store->customer(i);
+            customer_selector.append(oss.str());
+        }
+        customer_selector.set_active(store->customers() - 1);
+        dialog.get_content_area()->add(customer_selector);
 
-    dialog.add_button("Start Order", 1);
-    dialog.add_button("Cancel", 0);
-    dialog.show_all();
+        dialog.add_button("Start Order", 1);
+        dialog.add_button("Cancel", 0);
+        dialog.show_all();
 
-    int response = dialog.run();
-    if (response == 0) return;
+        int response = dialog.run();
+        if (response == 0)
+            return;
         order_number = store->add_order(store->customer(customer_selector.get_active_row_number()));
         set_status("Created Order " + std::to_string(order_number));
     }
-    
+
     {
-    Gtk::MessageDialog dialog{*this, "Add to order " + std::to_string(order_number)};
-    dialog.set_resizable(true);
-    std::ostringstream oss;
+        Gtk::MessageDialog dialog{*this, "Add to order " + std::to_string(order_number)};
+        dialog.set_resizable(true);
+        std::ostringstream oss;
 
-    Gtk::HBox quantityBox;
-    Gtk::Label quantityLabel{"Quantity"};
-    quantityBox.add(quantityLabel);
+        Gtk::HBox quantityBox;
+        Gtk::Label quantityLabel{"Quantity"};
+        quantityBox.add(quantityLabel);
 
-    Gtk::SpinButton quantity_button;
-    quantityBox.add(quantity_button);
-    quantity_button.set_range(1, 100);
-    quantity_button.set_increments(1, 1);
-    quantityBox.add(quantity_button);
+        Gtk::SpinButton quantity_button;
+        quantityBox.add(quantity_button);
+        quantity_button.set_range(1, 100);
+        quantity_button.set_increments(1, 1);
+        quantityBox.add(quantity_button);
 
-    dialog.get_content_area()->add(quantityBox);
+        dialog.get_content_area()->add(quantityBox);
 
+        Gtk::ComboBoxText productSelector;
+        for (int i = 0; i < store->products(); ++i)
+        {
+            oss.str("");
+            oss << store->product(i);
+            productSelector.append(oss.str());
+        }
+        productSelector.set_active(store->products() - 1);
+        dialog.get_content_area()->add(productSelector);
 
-    Gtk::ComboBoxText productSelector;
-    for (int i = 0; i < store->products(); ++i)
-    {
-        oss.str("");
-        oss << store->product(i);
-        productSelector.append(oss.str());
-    }
-    productSelector.set_active(store->products()-1);
-    dialog.get_content_area()->add(productSelector);
+        dialog.add_button("Add To Order", 1);
+        dialog.add_button("Complete Order", 0);
 
-    dialog.add_button("Add To Order", 1);
-    dialog.add_button("Complete Order", 0);
-
-    while (true)
-    {   
-        oss.str("");
-        oss << store->order(order_number);
-        dialog.set_secondary_text(oss.str());
-        dialog.show_all();
-        int response = dialog.run();
-        if (response == 1)
-        store->add_item(order_number, store->product(productSelector.get_active_row_number()), static_cast<int>(quantity_button.get_value()));
-        else break;
-    }
-    on_view_orders_click();
+        while (true)
+        {
+            oss.str("");
+            oss << store->order(order_number);
+            dialog.set_secondary_text(oss.str());
+            dialog.show_all();
+            int response = dialog.run();
+            if (response == 1)
+                store->add_item(order_number, store->product(productSelector.get_active_row_number()), static_cast<int>(quantity_button.get_value()));
+            else
+                break;
+        }
+        on_view_orders_click();
     }
 }
 
@@ -471,6 +484,90 @@ void Mainwin::on_new_mulch_click()
     }
 }
 
+void Mainwin::on_edit_customer_click()
+{
+    set_status("");
+    int index_number;
+    {
+        Gtk::Dialog dialog{"Edit which customer?", *this};
+        dialog.set_resizable(true);
+        std::ostringstream oss;
+
+        Gtk::ComboBoxText customer_selector;
+        for (int i = 0; i < store->customers(); ++i)
+        {
+            oss.str("");
+            oss << store->customer(i);
+            customer_selector.append(oss.str());
+        }
+
+        customer_selector.set_active(store->customers() - 1);
+        dialog.get_content_area()->add(customer_selector);
+
+        dialog.add_button("Edit", 1);
+        dialog.add_button("Delete", 2);
+        dialog.add_button("Cancel", 0);
+        dialog.show_all();
+
+        int response = dialog.run();
+        index_number = customer_selector.get_active_row_number();
+
+        if (response == 0)
+            return;
+        else if (response == 2)
+        {
+            store->delete_customer(index_number);
+        }
+        set_status("Customers being edited " + std::to_string(index_number));
+    }
+
+    {
+        Gtk::Dialog dialog{"Add Customer", *this};
+        Gtk::Grid grid;
+
+        Gtk::Label c_name{"Name: "};
+        Gtk::Entry e_name;
+        grid.attach(c_name, 0, 0, 1, 1);
+        grid.attach(e_name, 1, 0, 2, 1);
+
+        Gtk::Label c_phone{"Phone: "};
+        Gtk::Entry e_phone;
+        grid.attach(c_phone, 0, 1, 1, 1);
+        grid.attach(e_phone, 1, 1, 2, 1);
+
+        Gtk::Label c_email{"Email: "};
+        Gtk::Entry e_email;
+        grid.attach(c_email, 0, 2, 1, 1);
+        grid.attach(e_email, 1, 2, 2, 1);
+
+        dialog.get_content_area()->add(grid);
+
+        dialog.add_button("Submit", 1);
+        dialog.add_button("Cancel", 0);
+
+        dialog.show_all();
+        int response = dialog.run();
+
+        if (response == 1)
+        {
+            try
+            {
+                std::string name = std::string(e_name.get_text());
+                std::string phone = std::string(e_phone.get_text());
+                std::string email = std::string(e_email.get_text());
+                store->edit_customer(index_number, name, phone, email);
+                on_view_customers_click();
+            }
+            catch (std::exception &e)
+            {
+            }
+        }
+        else
+        {
+            throw std::runtime_error{"CANCEL"};
+        }
+    }
+}
 void Mainwin::on_view_products_click()
 {
     std::string s = "Current Products\n----------------\n\n";
@@ -486,6 +583,7 @@ void Mainwin::on_view_products_click()
 void Mainwin::on_view_customers_click()
 {
     std::string s = "Current Customers\n----------------\n\n";
+    store->get_sorted_customers();
     for (int i = 0; i < store->customers(); ++i)
     {
         std::ostringstream oss;
@@ -493,7 +591,6 @@ void Mainwin::on_view_customers_click()
             << store->customer(i) << "\n\n";
         s += oss.str();
     }
-
     display->set_text(s);
 }
 

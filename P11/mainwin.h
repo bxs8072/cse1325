@@ -15,6 +15,7 @@ class Mainwin : public Gtk::Window {
         void on_save_as_click();
         void on_open_click(); 
         void on_new_customer_click(); // Create a new customer
+        void on_edit_customer_click();
         void on_new_order_click(); // Create a new order
         void on_new_tool_click();      // Create a new tool product
         void on_new_plant_click();     // Create a new plant product

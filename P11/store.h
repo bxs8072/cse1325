@@ -11,6 +11,8 @@
 #include <ostream>
 #include <vector>
 
+bool compare(Customer* a, Customer* b);
+
 class Store {
   public:
     Store(std::string name);
@@ -25,10 +27,12 @@ class Store {
     void add_customer(const Customer& customer);
     int customers();
     Customer& customer(int index);
-
+    void get_sorted_customers();
+    void edit_customer(int index, std::string name, std::string phone, std::string email);
+    void delete_customer(int& index);
+    
     int add_order(Customer& customer);
     void add_item(int order, Product& product, int quantity);
-
     int orders();
     Order& order(int index);
   private:

@@ -11,6 +11,10 @@ Customer::Customer(std::istream& ist)
     std::getline(ist, _email);
 }
 
+std::string Customer::get_name() {
+    return _name;
+}
+
 void Customer::save(std::ostream& ost) const
 {
     ost << _name << '\n'

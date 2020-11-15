@@ -16,7 +16,7 @@ void Order::save(std::ostream& ost) const {
 }
 
 std::ostream& operator<<(std::ostream& ost, const Order& order) {
-    ost << "For Customer " <<order._customer << " $" << order.total() << '\n';
+    ost << "For Customer " <<order._customer << " $" << order.total() << std::endl << "\n";
     for(Item item: order._items) ost << item;
     return ost;
 }
