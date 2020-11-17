@@ -100,14 +100,19 @@ void Store::get_sorted_customers()
 int Store::orders() { return _orders.size(); }
 Order &Store::order(int index) { return *_orders.at(index); }
 
+std::vector<Order *> Store::order_list()
+{
+    return _orders;
+}
+
 int Store::add_order(Customer &customer)
 {
     _orders.push_back(new Order{customer});
-    if (Store::orders() <= 0)
+    if (_orders.size() <= 0)
     {
         return 0;
     }
-    return Store::orders() - 1;
+    return _orders.size() - 1;
 }
 
 void Store::add_item(int order, Product &product, int quantity)

@@ -226,11 +226,15 @@ Mainwin::Mainwin() : store{nullptr}, display{new Gtk::Label{}}, msg{new Gtk::Lab
     // /////////////////////////// ////////////////////////////////////////////
     // M A I N   W I N D O W   D I S P L A Y
     // Provide a text entry box to show the remaining sticks
+    //SCROLLED WINDOW
+    Gtk::ScrolledWindow *scrolledWindow = Gtk::manage(new Gtk::ScrolledWindow);
+    scrolledWindow->set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
 
     display = Gtk::manage(new Gtk::Label());
     display->set_hexpand(true);
     display->set_vexpand(true);
-    vbox->add(*display);
+    scrolledWindow->add(*display);
+    vbox->add(*scrolledWindow);
 
     msg = Gtk::manage(new Gtk::Label());
     msg->set_hexpand(true);
@@ -725,7 +729,6 @@ void Mainwin::on_edit_customer_click()
         dialog.get_content_area()->add(customer_selector);
 
         dialog.add_button("Edit", 1);
-        dialog.add_button("Delete", 2);
         dialog.add_button("Cancel", 0);
         dialog.show_all();
 
@@ -734,10 +737,6 @@ void Mainwin::on_edit_customer_click()
 
         if (response == 0)
             return;
-        else if (response == 2)
-        {
-            store->delete_customer(index_number);
-        }
     }
 
     {
@@ -823,12 +822,15 @@ void Mainwin::on_view_customers_click()
 void Mainwin::on_view_orders_click()
 {
     set_status("");
+    std::ostringstream oss;
     std::string s = "Current Orders\n----------------\n\n";
-    for (int i = 0; i < store->orders(); ++i)
+    int i = 0;
+    for (std::vector<Order *>::iterator o = store->order_list().begin();
+         o != store->order_list().end(); ++o)
     {
-        std::ostringstream oss;
-        oss << "Order #" << std::to_string(i) << '\n'
-            << store->order(i) << "\n\n";
+        oss << "ORDER NUMBER#" << std::to_string(i) << '\n'
+            << **o << "\n\n";
+        i++;
         s += oss.str();
     }
     display->set_text(s);

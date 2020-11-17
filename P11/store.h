@@ -35,6 +35,7 @@ public:
 
   int add_order(Customer &customer);
   void add_item(int order, Product &product, int quantity);
+  std::vector<Order *> order_list();
   int orders();
   Order &order(int index);
 
